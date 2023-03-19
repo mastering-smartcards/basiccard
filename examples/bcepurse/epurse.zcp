@@ -1,0 +1,12 @@
+[ZCT]
+0=issuer.ZCT
+1=bearer.ZCT
+
+[ZCC]
+0=epurse.ZCC
+
+[StartZCT]
+0=0
+
+[StartZCC]
+0=0

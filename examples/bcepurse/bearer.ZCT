@@ -1,0 +1,6 @@
+[Compiler]
+SourceFile=bearer.bas
+ExeFile=true
+
+[Terminal Program]
+LogFile=..\..\bearer.log

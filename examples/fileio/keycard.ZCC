@@ -1,0 +1,49 @@
+[Main Window]
+Left=619
+Top=0
+Width=405
+Height=438
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=330
+Top=230
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Files Window]
+Left=624
+Top=440
+Width=400
+Height=150
+State=0
+Visible=true
+StayOnTop=false
+
+[Compiler]
+SourceFile=Keycard.bas
+IncludePath=..\..\inc;..\..\lib;..\..\tools
+ImageFile=true
+
+[BasicCard]
+CardType=ZC3.3
+
+[Card Reader]
+VirtualReader=202
+
+[Watches]
+Watch1=CurDir

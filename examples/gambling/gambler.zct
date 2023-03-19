@@ -1,0 +1,49 @@
+[Main Window]
+Left=50
+Top=100
+Width=405
+Height=439
+State=2
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=330
+Top=230
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Call Stack Window]
+Left=430
+Top=329
+Width=357
+Height=228
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Free Memory Window]
+Left=542
+Top=249
+Width=414
+Height=135
+State=0
+Visible=false
+StayOnTop=false
+
+[Compiler]
+SourceFile=gambler.bas
+ExeFile=true
+ImageFile=true

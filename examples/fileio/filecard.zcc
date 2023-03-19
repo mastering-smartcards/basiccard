@@ -1,0 +1,8 @@
+[BasicCard]
+CardType=ZC3.3
+
+[Compiler]
+SourceFile=G:\devtools\BasicCardPro\Examples\FileIo\filecard.bas
+
+[Card Reader]
+VirtualReader=204

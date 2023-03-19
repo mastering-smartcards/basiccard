@@ -1,0 +1,842 @@
+File: F:\donsez\Rech\livreCartePuce\srcExempleOuvrage\basiccard\bcepurse\epurse.bas
+     1  Rem BasicCard Sample Source Code
+     2  Rem ------------------------------------------------------------------
+     3  Rem Copyright (C) 1997-1999 ZeitControl GmbH
+     4  Rem You have a royalty-free right to use, modify, reproduce and
+     5  Rem distribute the Sample Application Files (and/or any modified
+     6  Rem version) in any way you find useful, provided that you agree
+     7  Rem that ZeitControl GmbH has no warranty, obligations or liability
+     8  Rem for any Sample Application Files.
+     9  Rem ------------------------------------------------------------------
+    10  
+    11  Rem  DEBIT CARD
+    12  Rem
+    13  Rem  A BasicCard implementation of a secure debit card.
+    14  Rem
+    15  Rem  The card has two keys: Key 00 (Issuing Key) and Key 01 (Dealer Key).
+    16  Rem  In the Compact BasicCard, security algorithm &H11 is disabled, for
+    17  Rem  maximum security; all commands except GetCardData must be encrypted
+    18  Rem  with algorithm &H12.
+    19  Rem
+    20  Rem  The following commands are implemented:
+    21  Rem
+    22  Rem  PersonaliseCard (Amount As Long, PIN As String*4, Customer$)
+    23  Rem      Requires Issuing Key. A card can be personalised multiple times.
+    24  Rem
+    25  Rem  VerifyPIN (TestPIN As String*4)
+    26  Rem      This command must be called to enable the next three commands. The
+    27  Rem      commands remain enabled until the card is powered down or reset.
+    28  Rem      Requires Issuing Key or Dealer Key.
+    29  Rem
+    30  Rem  IncreaseAmount (Diff As Long)
+    31  Rem      Adds Diff to the amount on the card. Requires VerifyPIN.
+    32  Rem
+    33  Rem  DecreaseAmount (Diff As Long)
+    34  Rem      Subtracts Diff from the amount on the card. Requires VerifyPIN.
+    35  Rem
+    36  Rem  ChangePIN (NewPIN As String*4)
+    37  Rem      Changes the PIN. Requires VerifyPIN.
+    38  Rem
+    39  Rem  GetCardData (Amount As Long, PINCount As Byte, Customer$)
+    40  Rem      Returns the card data. PINCount@ is the number of attempts remaining
+    41  Rem      before the card must be returned to the issuer for personalisation.
+    42  Rem      (The number of failed PIN verifications allowed is given by the
+    43  Rem      constant MaxPINErrors.)
+    44  Rem
+    45  Rem  GetBalance (Amount As Long)
+    46  Rem      Returns the balance.
+    47  
+    48  
+    49  
+    50  Option Explicit ' Disable use of undefined variable names
+    51  
+    52  #Include EPURSE.DEF ' Declarations common to BasicCard and Terminal programs
+File: F:\donsez\Rech\livreCartePuce\srcExempleOuvrage\basiccard\bcepurse\EPURSE.DEF
+     1  Rem BasicCard Sample Source Code
+     2  Rem ------------------------------------------------------------------
+     3  Rem Copyright (C) 1997-1999 ZeitControl GmbH
+     4  Rem You have a royalty-free right to use, modify, reproduce and
+     5  Rem distribute the Sample Application Files (and/or any modified
+     6  Rem version) in any way you find useful, provided that you agree
+     7  Rem that ZeitControl GmbH has no warranty, obligations or liability
+     8  Rem for any Sample Application Files.
+     9  Rem ------------------------------------------------------------------
+    10  
+    11  Rem  DEBIT CARD
+    12  Rem
+    13  Rem  A BasicCard implementation of a secure debit card.
+    14  
+    15  Rem  Commands
+    16  
+    17  Declare Command &H80 &H00 PersonaliseCard (Amount As Long, NewPIN As String*4, Name$)
+    18  Declare Command &H80 &H02 VerifyPIN (TestPIN As String*4)
+    19  Declare Command &H80 &H04 IncreaseAmount (Diff As Long)
+    20  Declare Command &H80 &H06 DecreaseAmount (Diff As Long)
+    21  Declare Command &H80 &H08 ChangePIN (NewPIN As String*4)
+    22  Declare Command &H80 &H0A GetCardData (Amount As Long, PINCount, Customer$)
+    23  
+    24  Declare Command &H80 &H20 GetBalance (Balance As Long)
+    25  Declare Command &H80 &H22 Debit (Amount As Long)
+    26  Declare Command &H80 &H24 Credit (Amount As Long)
+    27  
+    28  Rem  Status codes. All of these have SW1 = &H6B, to avoid clashes with
+    29  Rem  the built-in status codes (see "1.4.2 Procedure Definitions" in the
+    30  Rem  BasicCard documentation).
+    31  
+    32  Const swNotPersonalised     = &H6B00
+    33  Const swInsufficientFunds   = &H6B01
+    34  Const swEncryptionRequired  = &H6B02
+    35  Const swIssuingKeyRequired  = &H6B03
+    36  Const swPINRequired         = &H6B04
+    37  Const swInvalidPIN          = &H6B05
+    38  Const swPINErrorsExceeded   = &H6B06
+    39  
+    40  Rem  Other constants
+    41  
+    42  Const ApplicationName$ = "EPURSE"
+    43  Const MaxPINErrors     = 3 ' Allow the user three unsuccessful attempts
+File: F:\donsez\Rech\livreCartePuce\srcExempleOuvrage\basiccard\bcepurse\epurse.bas
+    53  rem #Include DEALER.KEY
+    54  rem #Include ISSUER.KEY
+    55  
+    56  #Include COMMANDS.DEF
+File: G:\devtools\BasicCardPro\inc\COMMANDS.DEF
+     1  Rem BasicCard Sample Source Code
+     2  Rem ------------------------------------------------------------------
+     3  Rem Copyright (C) 1997-2001 ZeitControl GmbH
+     4  Rem You have a royalty-free right to use, modify, reproduce and
+     5  Rem distribute the Sample Application Files (and/or any modified
+     6  Rem version) in any way you find useful, provided that you agree
+     7  Rem that ZeitControl GmbH has no warranty, obligations or liability
+     8  Rem for any Sample Application Files.
+     9  Rem ------------------------------------------------------------------
+    10  
+    11  Rem Pre-defined BasicCard commands
+    12  
+    13  #IfNotDef CommandsDefIncluded ' Prevent multiple inclusion
+    14  Const CommandsDefIncluded = True
+    15  
+    16  Declare Command &HC0 &H00 GetState(Lc=0, State@, Version$)
+    17  Declare Command &HC0 &H02 EepromSize(Lc=0, Start%, Length%)
+    18  Declare Command &HC0 &H04 ClearEeprom(Length%, Disable Le)
+    19  
+    20  Rem  Since Version 3.01, the WRITE EEPROM command is no longer supported.
+    21  Rem  Use it at your own risk!
+    22  Rem
+    23  Rem  Declare Command &HC0 &H06 WriteEeprom(Data$, Disable Le)
+    24  
+    25  Declare Command &HC0 &H08 ReadEeprom(Lc=0, Data$)
+    26  Declare Command &HC0 &H0A EepromCRC(Length%)
+    27  Declare Command &HC0 &H0A EepromCRC32(Lc=2, CRCHi%, CRCLo%, Le=4)
+    28  Declare Command &HC0 &H0C SetState()
+    29  Declare Command &HC0 &H0E GetApplicationID(Lc=0, Name$)
+    30  Declare Command &HC0 &H10 StartEncryption(RA&, Le=0)
+    31  Declare Command &HC0 &H10 ProEncryption(RAHi&, RALo&, Le=0)
+    32  Declare Command &HC0 &H12 EndEncryption()
+    33  Declare Command &HC0 &H14 Echo(S$)
+    34  Declare Command &HC0 &H16 AssignNAD()
+    35  
+    36  Rem BasicCard operating system errors
+    37  
+    38  Const swCommandOK              = &H9000
+    39  Const swRetriesRemaining       = &H63C0
+    40  Const swEepromWriteError       = &H6581
+    41  Const swBadEepromHeap          = &H6582
+    42  Const swBadFileChain           = &H6583
+    43  Const swKeyNotFound            = &H6611
+    44  Const swPolyNotFound           = &H6612
+    45  Const swKeyTooShort            = &H6613
+    46  Const swKeyDisabled            = &H6614
+    47  Const swUnknownAlgorithm       = &H6615
+    48  Const swAlreadyEncrypting      = &H66C0
+    49  Const swNotEncrypting          = &H66C1
+    50  Const swBadCommandCRC          = &H66C2
+    51  Const swDesCheckError          = &H66C3
+    52  Const swCoprocessorError       = &H66C4
+    53  Const swAesCheckError          = &H66C5
+    54  Const swLcLeError              = &H6700
+    55  Const swCommandTooLong         = &H6781
+    56  Const swResponseTooLong        = &H6782
+    57  Const swInvalidState           = &H6985
+    58  Const swCardUnconfigured       = &H6986
+    59  Const swNewStateError          = &H6987
+    60  Const swP1P2Error              = &H6A00
+    61  Const swOutsideEeprom          = &H6A02
+    62  Const swDataNotFound           = &H6A88
+    63  Const swINSNotFound            = &H6D00
+    64  Const swReservedINS            = &H6D80
+    65  Const swCLANotFound            = &H6E00
+    66  Const swReservedCLA            = &H6E80
+    67  Const swInternalError          = &H6F00
+    68  
+    69  Rem SW1=&H61 is Le warning:
+    70  
+    71  Const sw1LeWarning             = &H61
+    72  
+    73  Rem SW1=&H6C is La warning (T=0 protocol only):
+    74  
+    75  Const sw1LaWarning             = &H6C
+    76  
+    77  Rem P-Code interpreter errors (SW1=&H64, SW2=P-Code error)
+    78  
+    79  Const sw1PCodeError            = &H64
+    80  
+    81  Const pcStackOverflow          = &H01
+    82  Const pcDivideByZero           = &H02
+    83  Const pcNotImplemented         = &H03
+    84  Const pcBadRamHeap             = &H04
+    85  Const pcBadEepromHeap          = &H05
+    86  Const pcReturnWithoutGoSub     = &H06
+    87  Const pcBadSubscript           = &H07
+    88  Const pcBadBounds              = &H08
+    89  Const pcInvalidReal            = &H09
+    90  Const pcOverflow               = &H0A
+    91  Const pcNegativeSqrt           = &H0B
+    92  Const pcDimensionError         = &H0C
+    93  Const pcBadStringCall          = &H0D
+    94  Const pcOutOfMemory            = &H0E
+    95  Const pcArrayNotDynamic        = &H0F
+    96  Const pcArrayTooBig            = &H10
+    97  Const pcDeletedArray           = &H11
+    98  Const pcPCodeDisabled          = &H12
+    99  Const pcBadSystemCall          = &H13
+   100  Const pcBadKey                 = &H14
+   101  Const pcBadLibraryCall         = &H15
+   102  Const pcStackUnderflow         = &H16
+   103  
+   104  Rem Error codes generated by the Terminal
+   105  
+   106  Const swNoCardReader           = &H6790
+   107  Const swCardReaderError        = &H6791
+   108  Const swNoCardInReader         = &H6792
+   109  Const swCardPulled             = &H6793
+   110  Const swT1Error                = &H6794
+   111  Const swCardError              = &H6795
+   112  Const swCardNotReset           = &H6796
+   113  Const swKeyNotLoaded           = &H6797
+   114  Const swPolyNotLoaded          = &H6798
+   115  Const swBadResponseCRC         = &H6799
+   116  Const swCardTimedOut           = &H679A
+   117  Const swTermOutOfMemory        = &H679B
+   118  Const swBadDesResponse         = &H679C
+   119  Const swInvalidComPort         = &H679D
+   120  Const swComPortNotSupported    = &H679E
+   121  Const swNoPcscDriver           = &H679F
+   122  Const swPcscReaderBusy         = &H67A0
+   123  Const swPcscError              = &H67A1
+   124  Const swComPortBusy            = &H67A2
+   125  Const swBadATR                 = &H67A3
+   126  Const swT0Error                = &H67A4
+   127  Const swPTSError               = &H67A7
+   128  Const swDataOverrun            = &H67A8
+   129  Const swBadAesResponse         = &H67A9
+   130  
+   131  #IfDef TerminalProgram
+   132  
+   133  Rem  AutoEncryption handles StartEncryption for the different card types.
+   134  Rem  To use:
+   135  Rem          Call AutoEncryption (KeyNum@)
+   136  Rem          Call CheckSW1SW2()
+   137  
+   138  Sub AutoEncryption (KeyNum@)
+   139    Call StartEncryption (P2=KeyNum@, Rnd)
+   140    Select Case SW1SW2
+   141      Case swUnknownAlgorithm ' Compact BasicCard doesn't support P1=0
+   142        Call StartEncryption (P1=&H12, P2=KeyNum@, Rnd)
+   143      Case swLcLeError ' Professional BasicCard with AES needs 8-byte random
+   144        Call ProEncryption (P2=KeyNum@, Rnd, Rnd)
+   145    End Select
+   146  End Sub
+   147  
+   148  #EndIf ' TerminalProgram
+   149  
+   150  #EndIf ' CommandsDefIncluded
+File: F:\donsez\Rech\livreCartePuce\srcExempleOuvrage\basiccard\bcepurse\epurse.bas
+    57  #include PReader.def
+File: G:\devtools\BasicCardPro\inc\PReader.def
+     1  Rem BasicCard Sample Source Code
+     2  Rem ------------------------------------------------------------------
+     3  Rem Copyright (C) 1997-2000 ZeitControl GmbH
+     4  Rem You have a royalty-free right to use, modify, reproduce and
+     5  Rem distribute the Sample Application Files (and/or any modified
+     6  Rem version) in any way you find useful, provided that you agree
+     7  Rem that ZeitControl GmbH has no warranty, obligations or liability
+     8  Rem for any Sample Application Files.
+     9  Rem ------------------------------------------------------------------
+    10  
+    11  Rem  PREADER.DEF
+    12  Rem
+    13  Rem  Definitions for using ZeitControl pocket reader
+    14  
+    15  #IfNotDef PReaderDefIncluded ' Prevent multiple inclusion
+    16  Const PReaderDefIncluded = True
+    17  
+    18  Const PRNoMoreData = 0
+    19  Const PRMoreData = 1
+    20  Const PRDelayUnits = 200 ' Delay time = Delay * PRDelayUnits [ms]
+    21  
+    22  Const PRAlpha   = 1
+    23  Const PRHex     = 2
+    24  Const PRNum     = 4
+    25  Const PRNumSign = 8
+    26  Const PRCur     = 16
+    27  
+    28  
+    29  REM DeviceID is available in parm Delay on input
+    30  REM DeviceVersion is available in parm MoreData on input
+    31  REM FormatDetails is available in parm Data on input
+    32  #ifdef CompactBasicCard
+    33  Declare Command &HC8 &H00 PRDisplay(RecordNumber as Byte, DataFormat as Byte, DigitCount as Byte, _
+    34                                      DecimalPoint as Byte, Delay as Byte, MoreData as Byte, _
+    35                                      Data as String<=11)
+    36  #else
+    37  Declare Command &HC8 &H00 PRDisplay(RecordNumber as Byte, DataFormat as Byte, DigitCount as Byte, _
+    38                                      DecimalPoint as Byte, Delay as Byte, MoreData as Byte, _
+    39                                      Data as String)
+    40  #endif
+    41  
+    42  #EndIf ' PReaderDefIncluded
+File: F:\donsez\Rech\livreCartePuce\srcExempleOuvrage\basiccard\bcepurse\epurse.bas
+    58  
+    59  Declare ApplicationID = ApplicationName$
+$ApplicationID:
+        EEPDATA     83FA:  06 45 50 55 52 53 45
+    60  Disable Encryption &H11
+    61  
+    62  Rem  Permanent data
+    63  
+    64  Eeprom Personalised = False
+Personalised:
+        EEPDATA     8401:  00 00
+    65  Eeprom Balance As Long
+Balance:
+        EEPDATA     8403:  00 00 00 00
+    66  Eeprom PIN As String*4
+PIN:
+        EEPDATA     8407:  00 00 00 00
+    67  ' Change following line to set your initial master PIN
+    68  Eeprom MasterPIN As String*6 = "123456"
+MasterPIN:
+        EEPDATA     840B:  31 32 33 34 35 36
+    69  Eeprom CustomerName$
+CustomerName$:
+        EEPDATA     8411:  00 00
+    70  Eeprom PINErrors
+PINErrors:
+        EEPDATA     8413:  00 00
+    71  
+    72  Rem  EEPROM shadow data, to ensure that Balance is always valid
+    73  Rem
+    74  Rem  See "1.4.4 Permanent Data" in the BasicCard manual.
+    75  
+    76  Eeprom ShadowBalance As Long
+ShadowBalance:
+        EEPDATA     8415:  00 00 00 00
+    77  Eeprom Committed = False
+Committed:
+        EEPDATA     8419:  00 00
+    78  
+    79  Rem  Public data (re-initialised when card is reset)
+    80  
+    81  Public PINVerified = False
+    82  Public MasterPINVerified = False
+    83  
+    84  Rem  Subroutine declaration
+    85  
+    86  Declare Sub ChangeBalance (NewBalance As Long)
+    87  Declare Sub CheckAlgorithm()
+    88  
+    89  Rem  Start-up code: clean up if an EEPROM write was interrupted
+    90  Rem
+    91  Rem  See "1.4.4 Permanent Data" in the BasicCard manual.
+    92  
+    93  If Committed Then
+$InitCode:
+        PCODE       81BA:  46 00    ENTER 00
+        PCODE       81BC:  14 8419  PUEWW Committed
+        PCODE       81BF:  4B 0B    JZRWB $Else001
+    94    Balance = ShadowBalance
+        PCODE       81C1:  15 8415  PUELW ShadowBalance
+        PCODE       81C4:  26 8403  POELW Balance
+    95    Committed = False
+        PCODE       81C7:  0C 00    PUCWB 00
+        PCODE       81C9:  25 8419  POEWW Committed
+$Else001:
+        PCODE       81CC:  47       LEAVE
+    96  End If
+    97  
+    98  Command &H80 &H00 PersonaliseCard (Amount As Long, NewPIN As String*4, Name$)
+PersonaliseCard:
+        PCODE       81CD:  46 00    ENTER 00
+        CMDTAB      817D:  0C 80 00 8A 81 CD
+    99  rem  Call CheckAlgorithm()
+   100  rem   If KeyNumber <> 0 Then SW1SW2 = swIssuingKeyRequired : Exit
+   101    Personalised = False ' In case power is lost in the next three statements
+        PCODE       81CF:  0C 00    PUCWB 00
+        PCODE       81D1:  25 8401  POEWW Personalised
+   102    Balance = Amount
+        PCODE       81D4:  A9       PUFLF4 (Amount)
+        PCODE       81D5:  26 8403  POELW Balance
+   103    CustomerName$ = Name$
+        PCODE       81D8:  1A FC    PUFSB Name$
+        PCODE       81DA:  16 8411  PUESW CustomerName$
+        PCODE       81DD:  5D       COPY$
+   104    PIN = NewPIN
+        PCODE       81DE:  0B 04    PUCCB 04
+        PCODE       81E0:  1B F8    PUFAB NewPIN
+        PCODE       81E2:  0B 04    PUCCB 04
+        PCODE       81E4:  0E 8407  PUCWW PIN
+        PCODE       81E7:  5D       COPY$
+   105    Personalised = True
+        PCODE       81E8:  0C FF    PUCWB FF
+        PCODE       81EA:  25 8401  POEWW Personalised
+   106  End Command
+        PCODE       81ED:  54       EXIT
+   107  
+   108  Command &H80 &H02 VerifyPIN (TestPIN As String*4)
+VerifyPIN:
+        PCODE       81EE:  46 00    ENTER 00
+        CMDTAB      8183:  80 02 04 81 EE
+   109    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       81F0:  14 8401  PUEWW Personalised
+        PCODE       81F3:  4C 06    JNZWB $Else002
+        PCODE       81F5:  0E 6B00  PUCWW 6B00
+        PCODE       81F8:  22 56    PORWB SW1SW2
+        PCODE       81FA:  54       EXIT
+   110  rem  Call CheckAlgorithm()
+   111  rem  If KeyNumber <> 0 And PINErrors > MaxPINErrors Then _
+   112    If PINErrors > MaxPINErrors Then SW1SW2 = swPINErrorsExceeded : Exit
+$Else002:
+        PCODE       81FB:  14 8413  PUEWW PINErrors
+        PCODE       81FE:  0C 03    PUCWB 03
+        PCODE       8200:  4F 06    JLEWB $Else003
+        PCODE       8202:  0E 6B06  PUCWW 6B06
+        PCODE       8205:  22 56    PORWB SW1SW2
+        PCODE       8207:  54       EXIT
+   113    If TestPIN = PIN Then PINErrors = 0 : PINVerified = True : Exit
+$Else003:
+        PCODE       8208:  0B 04    PUCCB 04
+        PCODE       820A:  1B FA    PUFAB TestPIN
+        PCODE       820C:  0B 04    PUCCB 04
+        PCODE       820E:  0E 8407  PUCWW PIN
+        PCODE       8211:  6C       COMP$
+        PCODE       8212:  4E 0A    JNEWB $Else004
+        PCODE       8214:  0C 00    PUCWB 00
+        PCODE       8216:  25 8413  POEWW PINErrors
+        PCODE       8219:  0C FF    PUCWB FF
+        PCODE       821B:  22 9C    PORWB PINVerified
+        PCODE       821D:  54       EXIT
+   114    PINErrors = PINErrors + 1
+$Else004:
+        PCODE       821E:  14 8413  PUEWW PINErrors
+        PCODE       8221:  41       INCW
+        PCODE       8222:  25 8413  POEWW PINErrors
+   115    SW1SW2 = swInvalidPIN
+        PCODE       8225:  0E 6B05  PUCWW 6B05
+        PCODE       8228:  22 56    PORWB SW1SW2
+   116    PINVerified = False
+        PCODE       822A:  0C 00    PUCWB 00
+        PCODE       822C:  22 9C    PORWB PINVerified
+   117  End Command
+        PCODE       822E:  54       EXIT
+   118  
+   119  Command &H80 &H04 IncreaseAmount (Diff As Long)
+IncreaseAmount:
+        PCODE       822F:  46 00    ENTER 00
+        CMDTAB      8188:  80 04 04 82 2F
+   120    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       8231:  14 8401  PUEWW Personalised
+        PCODE       8234:  4C 06    JNZWB $Else005
+        PCODE       8236:  0E 6B00  PUCWW 6B00
+        PCODE       8239:  22 56    PORWB SW1SW2
+        PCODE       823B:  54       EXIT
+   121  rem  Call CheckAlgorithm()
+   122    If Not (PINVerified OR MasterPINVerified) Then SW1SW2 = swPINRequired : Exit
+$Else005:
+        PCODE       823C:  10 9C    PURWB PINVerified
+        PCODE       823E:  10 9E    PURWB MasterPINVerified
+        PCODE       8240:  39       ORW
+        PCODE       8241:  4C 06    JNZWB $Else006
+        PCODE       8243:  0E 6B04  PUCWW 6B04
+        PCODE       8246:  22 56    PORWB SW1SW2
+        PCODE       8248:  54       EXIT
+   123    Call ChangeBalance (Balance + Diff)
+$Else006:
+        PCODE       8249:  15 8403  PUELW Balance
+        PCODE       824C:  AF       PUFLFA (Diff)
+        PCODE       824D:  2E       ADDL
+        PCODE       824E:  45 834B  CALL ChangeBalance
+        PCODE       8251:  01 FC    ADDSP FC
+   124  End Command
+        PCODE       8253:  54       EXIT
+   125  
+   126  Command &H80 &H06 DecreaseAmount (Diff As Long)
+DecreaseAmount:
+        PCODE       8254:  46 00    ENTER 00
+        CMDTAB      818D:  80 06 04 82 54
+   127    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       8256:  14 8401  PUEWW Personalised
+        PCODE       8259:  4C 06    JNZWB $Else007
+        PCODE       825B:  0E 6B00  PUCWW 6B00
+        PCODE       825E:  22 56    PORWB SW1SW2
+        PCODE       8260:  54       EXIT
+   128  rem  Call CheckAlgorithm()
+   129    If Not (PINVerified OR MasterPINVerified) Then SW1SW2 = swPINRequired : Exit
+$Else007:
+        PCODE       8261:  10 9C    PURWB PINVerified
+        PCODE       8263:  10 9E    PURWB MasterPINVerified
+        PCODE       8265:  39       ORW
+        PCODE       8266:  4C 06    JNZWB $Else008
+        PCODE       8268:  0E 6B04  PUCWW 6B04
+        PCODE       826B:  22 56    PORWB SW1SW2
+        PCODE       826D:  54       EXIT
+   130    If Diff > Balance Then SW1SW2 = swInsufficientFunds : Exit
+$Else008:
+        PCODE       826E:  AF       PUFLFA (Diff)
+        PCODE       826F:  15 8403  PUELW Balance
+        PCODE       8272:  03       COMPL
+        PCODE       8273:  4F 06    JLEWB $Else009
+        PCODE       8275:  0E 6B01  PUCWW 6B01
+        PCODE       8278:  22 56    PORWB SW1SW2
+        PCODE       827A:  54       EXIT
+   131    Call ChangeBalance (Balance - Diff)
+$Else009:
+        PCODE       827B:  15 8403  PUELW Balance
+        PCODE       827E:  AF       PUFLFA (Diff)
+        PCODE       827F:  30       SUBL
+        PCODE       8280:  45 834B  CALL ChangeBalance
+        PCODE       8283:  01 FC    ADDSP FC
+   132  End Command
+        PCODE       8285:  54       EXIT
+   133  
+   134  Command &H80 &H08 ChangePIN (NewPIN As String*4)
+ChangePIN:
+        PCODE       8286:  46 00    ENTER 00
+        CMDTAB      8192:  80 08 04 82 86
+   135    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       8288:  14 8401  PUEWW Personalised
+        PCODE       828B:  4C 06    JNZWB $Else010
+        PCODE       828D:  0E 6B00  PUCWW 6B00
+        PCODE       8290:  22 56    PORWB SW1SW2
+        PCODE       8292:  54       EXIT
+   136  rem  Call CheckAlgorithm()
+   137    If Not (PINVerified OR MasterPINVerified) Then SW1SW2 = swPINRequired : Exit
+$Else010:
+        PCODE       8293:  10 9C    PURWB PINVerified
+        PCODE       8295:  10 9E    PURWB MasterPINVerified
+        PCODE       8297:  39       ORW
+        PCODE       8298:  4C 06    JNZWB $Else011
+        PCODE       829A:  0E 6B04  PUCWW 6B04
+        PCODE       829D:  22 56    PORWB SW1SW2
+        PCODE       829F:  54       EXIT
+   138    PIN = NewPIN
+$Else011:
+        PCODE       82A0:  0B 04    PUCCB 04
+        PCODE       82A2:  1B FA    PUFAB NewPIN
+        PCODE       82A4:  0B 04    PUCCB 04
+        PCODE       82A6:  0E 8407  PUCWW PIN
+        PCODE       82A9:  5D       COPY$
+   139  End Command
+        PCODE       82AA:  54       EXIT
+   140  
+   141  Command &H80 &H0A GetCardData (Amount As Long, PINCount, Name$)
+GetCardData:
+        PCODE       82AB:  46 00    ENTER 00
+        CMDTAB      8197:  80 0A 88 82 AB
+   142    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       82AD:  14 8401  PUEWW Personalised
+        PCODE       82B0:  4C 06    JNZWB $Else012
+        PCODE       82B2:  0E 6B00  PUCWW 6B00
+        PCODE       82B5:  22 56    PORWB SW1SW2
+        PCODE       82B7:  54       EXIT
+   143    Amount = Balance
+$Else012:
+        PCODE       82B8:  15 8403  PUELW Balance
+        PCODE       82BB:  EB       POFLF6 (Amount)
+   144    PINCount = MaxPINErrors - PINErrors
+        PCODE       82BC:  0C 03    PUCWB 03
+        PCODE       82BE:  14 8413  PUEWW PINErrors
+        PCODE       82C1:  2F       SUBW
+        PCODE       82C2:  CD       POFWFA (PINCount)
+   145    Name$ = CustomerName$
+        PCODE       82C3:  16 8411  PUESW CustomerName$
+        PCODE       82C6:  1A FC    PUFSB Name$
+        PCODE       82C8:  5D       COPY$
+   146  End Command
+        PCODE       82C9:  54       EXIT
+   147  
+   148  Command &H80 &H20 GetBalance (Amount As Long)
+GetBalance:
+        PCODE       82CA:  46 00    ENTER 00
+        CMDTAB      819C:  80 20 04 82 CA
+   149    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       82CC:  14 8401  PUEWW Personalised
+        PCODE       82CF:  4C 06    JNZWB $Else013
+        PCODE       82D1:  0E 6B00  PUCWW 6B00
+        PCODE       82D4:  22 56    PORWB SW1SW2
+        PCODE       82D6:  54       EXIT
+   150    Amount = Balance
+$Else013:
+        PCODE       82D7:  15 8403  PUELW Balance
+        PCODE       82DA:  EF       POFLFA (Amount)
+   151  End Command
+        PCODE       82DB:  54       EXIT
+   152  
+   153  Command &H80 &H24 Credit (Amount As Long)
+Credit:
+        PCODE       82DC:  46 00    ENTER 00
+        CMDTAB      81A1:  80 24 04 82 DC
+   154    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       82DE:  14 8401  PUEWW Personalised
+        PCODE       82E1:  4C 06    JNZWB $Else014
+        PCODE       82E3:  0E 6B00  PUCWW 6B00
+        PCODE       82E6:  22 56    PORWB SW1SW2
+        PCODE       82E8:  54       EXIT
+   155  rem  Call CheckAlgorithm()
+   156    If Not (PINVerified OR MasterPINVerified) Then SW1SW2 = swPINRequired : Exit
+$Else014:
+        PCODE       82E9:  10 9C    PURWB PINVerified
+        PCODE       82EB:  10 9E    PURWB MasterPINVerified
+        PCODE       82ED:  39       ORW
+        PCODE       82EE:  4C 06    JNZWB $Else015
+        PCODE       82F0:  0E 6B04  PUCWW 6B04
+        PCODE       82F3:  22 56    PORWB SW1SW2
+        PCODE       82F5:  54       EXIT
+   157    Call ChangeBalance (Balance + Amount)
+$Else015:
+        PCODE       82F6:  15 8403  PUELW Balance
+        PCODE       82F9:  AF       PUFLFA (Amount)
+        PCODE       82FA:  2E       ADDL
+        PCODE       82FB:  45 834B  CALL ChangeBalance
+        PCODE       82FE:  01 FC    ADDSP FC
+   158    Amount=Balance ' new balance is returned in amount param
+        PCODE       8300:  15 8403  PUELW Balance
+        PCODE       8303:  EF       POFLFA (Amount)
+   159  End Command
+        PCODE       8304:  54       EXIT
+   160  
+   161  Command &H80 &H22 Debit (Amount As Long)
+Debit:
+        PCODE       8305:  46 00    ENTER 00
+        CMDTAB      81A6:  80 22 04 83 05
+   162    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       8307:  14 8401  PUEWW Personalised
+        PCODE       830A:  4C 06    JNZWB $Else016
+        PCODE       830C:  0E 6B00  PUCWW 6B00
+        PCODE       830F:  22 56    PORWB SW1SW2
+        PCODE       8311:  54       EXIT
+   163  rem  Call CheckAlgorithm()
+   164    If Not (PINVerified OR MasterPINVerified) Then SW1SW2 = swPINRequired : Exit
+$Else016:
+        PCODE       8312:  10 9C    PURWB PINVerified
+        PCODE       8314:  10 9E    PURWB MasterPINVerified
+        PCODE       8316:  39       ORW
+        PCODE       8317:  4C 06    JNZWB $Else017
+        PCODE       8319:  0E 6B04  PUCWW 6B04
+        PCODE       831C:  22 56    PORWB SW1SW2
+        PCODE       831E:  54       EXIT
+   165    If Amount > Balance Then SW1SW2 = swInsufficientFunds : Exit
+$Else017:
+        PCODE       831F:  AF       PUFLFA (Amount)
+        PCODE       8320:  15 8403  PUELW Balance
+        PCODE       8323:  03       COMPL
+        PCODE       8324:  4F 06    JLEWB $Else018
+        PCODE       8326:  0E 6B01  PUCWW 6B01
+        PCODE       8329:  22 56    PORWB SW1SW2
+        PCODE       832B:  54       EXIT
+   166    Call ChangeBalance (Balance - Amount)
+$Else018:
+        PCODE       832C:  15 8403  PUELW Balance
+        PCODE       832F:  AF       PUFLFA (Amount)
+        PCODE       8330:  30       SUBL
+        PCODE       8331:  45 834B  CALL ChangeBalance
+        PCODE       8334:  01 FC    ADDSP FC
+   167    Amount=Balance ' new balance is returned in amount param
+        PCODE       8336:  15 8403  PUELW Balance
+        PCODE       8339:  EF       POFLFA (Amount)
+   168  End Command
+        PCODE       833A:  54       EXIT
+   169  
+   170  Rem  Sub CheckAlgorithm()
+   171  Rem
+   172  Rem  Check that the appropriate encryption algorithm is enabled (&H12
+   173  Rem  in the Compact BasicCard, &H21 in the Enhanced BasicCard)
+   174  
+   175  Sub CheckAlgorithm()
+CheckAlgorithm:
+        PCODE       833B:  46 00    ENTER 00
+   176  
+   177  #IfDef CompactBasicCard
+   178    If Algorithm <> &H12 Then SW1SW2 = swEncryptionRequired : Exit
+   179  #ElseIfDef EnhancedBasicCard
+   180    If Algorithm <> &H21 Then SW1SW2 = swEncryptionRequired : Exit
+        PCODE       833D:  0F 25    PURCB Algorithm
+        PCODE       833F:  07       CVTCW
+        PCODE       8340:  0C 21    PUCWB 21
+        PCODE       8342:  4D 06    JEQWB $Else019
+        PCODE       8344:  0E 6B02  PUCWW 6B02
+        PCODE       8347:  22 56    PORWB SW1SW2
+        PCODE       8349:  54       EXIT
+   181  #Else
+   182    If Algorithm <> &H23 Then SW1SW2 = swEncryptionRequired : Exit
+   183  #EndIf
+   184  
+   185  End Sub
+$Else019:
+        PCODE       834A:  47       LEAVE
+   186  
+   187  Rem  Sub ChangeBalance (NewBalance As Long)
+   188  Rem
+   189  Rem  Change the Balance variable, guarding against the possibility that
+   190  Rem  it is left in an inconsistent state by a sudden loss of power.
+   191  Rem
+   192  Rem  See "1.4.3 Permanent Data" in the BasicCard manual.
+   193  
+   194  Sub ChangeBalance (NewBalance As Long)
+ChangeBalance:
+        PCODE       834B:  46 00    ENTER 00
+   195    ShadowBalance = NewBalance
+        PCODE       834D:  AD       PUFLF8 (NewBalance)
+        PCODE       834E:  26 8415  POELW ShadowBalance
+   196    Committed = True
+        PCODE       8351:  0C FF    PUCWB FF
+        PCODE       8353:  25 8419  POEWW Committed
+   197    Balance = ShadowBalance
+        PCODE       8356:  15 8415  PUELW ShadowBalance
+        PCODE       8359:  26 8403  POELW Balance
+   198    Committed = False
+        PCODE       835C:  0C 00    PUCWB 00
+        PCODE       835E:  25 8419  POEWW Committed
+   199  End Sub
+        PCODE       8361:  47       LEAVE
+   200  
+   201  Command &H80 &H0E ChangeMasterPIN (NewPIN As String*6)
+ChangeMasterPIN:
+        PCODE       8362:  46 00    ENTER 00
+        CMDTAB      81AB:  80 0E 06 83 62
+   202    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       8364:  14 8401  PUEWW Personalised
+        PCODE       8367:  4C 06    JNZWB $Else020
+        PCODE       8369:  0E 6B00  PUCWW 6B00
+        PCODE       836C:  22 56    PORWB SW1SW2
+        PCODE       836E:  54       EXIT
+   203  rem   Call CheckAlgorithm()
+   204    If Not MasterPINVerified Then SW1SW2 = swPINRequired : Exit
+$Else020:
+        PCODE       836F:  10 9E    PURWB MasterPINVerified
+        PCODE       8371:  4C 06    JNZWB $Else021
+        PCODE       8373:  0E 6B04  PUCWW 6B04
+        PCODE       8376:  22 56    PORWB SW1SW2
+        PCODE       8378:  54       EXIT
+   205    MasterPIN = NewPIN
+$Else021:
+        PCODE       8379:  0B 06    PUCCB 06
+        PCODE       837B:  1B F8    PUFAB NewPIN
+        PCODE       837D:  0B 06    PUCCB 06
+        PCODE       837F:  0E 840B  PUCWW MasterPIN
+        PCODE       8382:  5D       COPY$
+   206  End Command
+        PCODE       8383:  54       EXIT
+   207  
+   208  REM In opposition to normal PIN we use no PIN count, but
+   209  REM issuer key is required instead.
+   210  Command &H80 &H0C VerifyMasterPIN (TestPIN As String*6)
+VerifyMasterPIN:
+        PCODE       8384:  46 00    ENTER 00
+        CMDTAB      81B0:  80 0C 06 83 84
+   211    If Not Personalised Then SW1SW2 = swNotPersonalised : Exit
+        PCODE       8386:  14 8401  PUEWW Personalised
+        PCODE       8389:  4C 06    JNZWB $Else022
+        PCODE       838B:  0E 6B00  PUCWW 6B00
+        PCODE       838E:  22 56    PORWB SW1SW2
+        PCODE       8390:  54       EXIT
+   212  rem   Call CheckAlgorithm()
+   213  rem  If KeyNumber <> 0 Then _
+   214  rem     SW1SW2 = swIssuingKeyRequired : Exit
+   215    If TestPIN = MasterPIN Then MasterPINVerified = True : Exit
+$Else022:
+        PCODE       8391:  0B 06    PUCCB 06
+        PCODE       8393:  1B F8    PUFAB TestPIN
+        PCODE       8395:  0B 06    PUCCB 06
+        PCODE       8397:  0E 840B  PUCWW MasterPIN
+        PCODE       839A:  6C       COMP$
+        PCODE       839B:  4E 05    JNEWB $Else023
+        PCODE       839D:  0C FF    PUCWB FF
+        PCODE       839F:  22 9E    PORWB MasterPINVerified
+        PCODE       83A1:  54       EXIT
+   216    SW1SW2 = swInvalidPIN
+$Else023:
+        PCODE       83A2:  0E 6B05  PUCWW 6B05
+        PCODE       83A5:  22 56    PORWB SW1SW2
+   217    MasterPINVerified = False
+        PCODE       83A7:  0C 00    PUCWB 00
+        PCODE       83A9:  22 9E    PORWB MasterPINVerified
+   218  End Command
+        PCODE       83AB:  54       EXIT
+   219  
+   220  Command &HC8 &H00 PRDisplay(RecordNumber as Byte, DataFormat as Byte, DigitCount as Byte, _
+PRDisplay:
+        PCODE       83AC:  46 06    ENTER 06
+   221                              DecimalPoint as Byte, Delay as Byte, MoreData as Byte, _
+   222                              Data as String)
+        CMDTAB      81B5:  C8 00 88 83 AC
+   223    Dim BalanceData as Long
+   224    Dim BalanceDataStr as String*4 at BalanceData
+   225    select case RecordNumber
+        PCODE       83AE:  17 F6    PUFCB RecordNumber
+        PCODE       83B0:  07       CVTCW
+        PCODE       83B1:  D4       POFW04 ($Temp001%)
+   226       case 0
+        PCODE       83B2:  94       PUFW04 ($Temp001%)
+        PCODE       83B3:  4C 20    JNZWB $NextCase001
+   227         DataFormat=PRNumSign ' Number with sign
+        PCODE       83B5:  0B 08    PUCCB 08
+        PCODE       83B7:  27 F7    POFCB DataFormat
+   228         DigitCount=0         ' show all digits
+        PCODE       83B9:  0B 00    PUCCB 00
+        PCODE       83BB:  27 F8    POFCB DigitCount
+   229         DecimalPoint=3       ' decimal point at 3 character (2 digits follow point)
+        PCODE       83BD:  0B 03    PUCCB 03
+        PCODE       83BF:  27 F9    POFCB DecimalPoint
+   230         Delay=0              ' show till card is removed
+        PCODE       83C1:  0B 00    PUCCB 00
+        PCODE       83C3:  27 FA    POFCB Delay
+   231         MoreData=PRNoMoreData ' no more data to show
+        PCODE       83C5:  0B 00    PUCCB 00
+        PCODE       83C7:  27 FB    POFCB MoreData
+   232         BalanceData=Balance  ' convert long to string
+        PCODE       83C9:  15 8403  PUELW Balance
+        PCODE       83CC:  F0       POFL00 (BalanceData)
+   233         Data=BalanceDataStr  ' and send to balance reader
+        PCODE       83CD:  0B 04    PUCCB 04
+        PCODE       83CF:  1B 00    PUFAB BalanceDataStr
+        PCODE       83D1:  1A FC    PUFSB Data
+        PCODE       83D3:  5D       COPY$
+        PCODE       83D4:  54       EXIT
+   234       case else
+   235         DataFormat=PRAlpha
+$NextCase001:
+        PCODE       83D5:  0B 01    PUCCB 01
+        PCODE       83D7:  27 F7    POFCB DataFormat
+   236         DigitCount=0
+        PCODE       83D9:  0B 00    PUCCB 00
+        PCODE       83DB:  27 F8    POFCB DigitCount
+   237         DecimalPoint=0
+        PCODE       83DD:  0B 00    PUCCB 00
+        PCODE       83DF:  27 F9    POFCB DecimalPoint
+   238         Delay=1000 / PRDelayUnits ' 1 second to show
+        PCODE       83E1:  0B 05    PUCCB 05
+        PCODE       83E3:  27 FA    POFCB Delay
+   239         MoreData=PRNoMoreData
+        PCODE       83E5:  0B 00    PUCCB 00
+        PCODE       83E7:  27 FB    POFCB MoreData
+   240         Data="ERR" ' Error message
+        PCODE       83E9:  0B 03    PUCCB 03
+        PCODE       83EB:  0E 83F7  PUCWW $StrCon001
+        PCODE       83EE:  1A FC    PUFSB Data
+        PCODE       83F0:  5D       COPY$
+$StrCon001:
+        STRCON      83F7:  45 52 52
+   241    end select
+   242  End Command
+        PCODE       83F1:  54       EXIT

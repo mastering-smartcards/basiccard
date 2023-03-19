@@ -1,0 +1,43 @@
+Rem BasicCard Sample Source Code
+Rem ------------------------------------------------------------------
+Rem Copyright (C) 1997-1999 ZeitControl GmbH
+Rem You have a royalty-free right to use, modify, reproduce and 
+Rem distribute the Sample Application Files (and/or any modified 
+Rem version) in any way you find useful, provided that you agree 
+Rem that ZeitControl GmbH has no warranty, obligations or liability
+Rem for any Sample Application Files.
+Rem ------------------------------------------------------------------
+
+Rem  DEBIT CARD
+Rem
+Rem  A BasicCard implementation of a secure debit card.
+
+Rem  Commands
+
+Declare Command &H80 &H00 PersonaliseCard (Amount As Long, NewPIN As String*4, Name$)
+Declare Command &H80 &H02 VerifyPIN (TestPIN As String*4)
+Declare Command &H80 &H04 IncreaseAmount (Diff As Long)
+Declare Command &H80 &H06 DecreaseAmount (Diff As Long)
+Declare Command &H80 &H08 ChangePIN (NewPIN As String*4)
+Declare Command &H80 &H0A GetCardData (Amount As Long, PINCount, Customer$)
+
+Declare Command &H80 &H20 GetBalance (Balance As Long)
+Declare Command &H80 &H22 Debit (Amount As Long)
+Declare Command &H80 &H24 Credit (Amount As Long)
+
+Rem  Status codes. All of these have SW1 = &H6B, to avoid clashes with
+Rem  the built-in status codes (see "1.4.2 Procedure Definitions" in the
+Rem  BasicCard documentation).
+
+Const swNotPersonalised     = &H6B00
+Const swInsufficientFunds   = &H6B01
+Const swEncryptionRequired  = &H6B02
+Const swIssuingKeyRequired  = &H6B03
+Const swPINRequired         = &H6B04
+Const swInvalidPIN          = &H6B05
+Const swPINErrorsExceeded   = &H6B06
+
+Rem  Other constants
+
+Const ApplicationName$ = "EPURSE"
+Const MaxPINErrors     = 3 ' Allow the user three unsuccessful attempts

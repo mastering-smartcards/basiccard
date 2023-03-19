@@ -1,0 +1,9 @@
+[ZCT]
+0=gambler.zct
+1=issuer.zct
+
+[ZCC]
+0=gambling.zcc
+
+[StartZCT]
+0=1

@@ -1,0 +1,60 @@
+[Main Window]
+Left=505
+Top=100
+Width=405
+Height=438
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=508
+Top=545
+Width=400
+Height=150
+State=0
+Visible=true
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Files Window]
+Left=360
+Top=260
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[BasicCard]
+CardType=ZC3.9
+
+[Compiler]
+SourceFile=cryptocard.bas
+ImageFile=true
+
+[Card Reader]
+VirtualReader=1
+
+[Watches]
+Watch1=KeyStr$
+Watch2=KeyLen@
+Watch3=DataBlockNum@
+Watch4=Block
+Watch5=Data$
+
+[EEPROM]
+MaskCRC=9501F1FC
+CRC=34373F10
+Length=99
+Block0=B]|r/65SrVohv08k464J-a@qqlYs^V'!:;YB,d$;Y1CrFqjE~_1Nw7(wIZ}#z/QP'ICvDHv
+Block1=XhFZoW%pyNm)av{NG#-vb`&)~HmZ4>gN6(!I1}t`h<H=Vjgfx[
+StartCRC=9BC9B71F

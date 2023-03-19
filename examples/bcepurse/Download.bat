@@ -1,0 +1,1 @@
+..\..\bcload -D DebitCrd

@@ -1,0 +1,54 @@
+[Main Window]
+Left=581
+Top=108
+Width=405
+Height=438
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=330
+Top=230
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Files Window]
+Left=582
+Top=546
+Width=400
+Height=150
+State=0
+Visible=true
+StayOnTop=false
+
+[Compiler]
+SourceFile=Opencard.bas
+IncludePath=..\..\inc;..\..\lib;..\..\tools
+
+[BasicCard]
+CardType=ZC3.3
+
+[Card Reader]
+VirtualReader=201
+
+[EEPROM]
+MaskCRC=B2DC3726
+CRC=2F4DAF68
+Length=145
+Block0=B^!:(F^u}fRqeU:@3wK%sk0up((,cg2ou*^OAd0a#U,p+44{:i+mla/Mv9?X5A.<dzOZq(z
+Block1=@37F]`ekIRYgu<lVks8v`6D5iN^Lb<?Rmv1?*h&mgqR_zP4tiu?CJSs>7<?,W#1Ef]fHIVF
+Block2=%7U6]w{_%K?{vs\Dz2Jt%bp%SM@7H=?&|28Z
+StartCRC=6BAA5118

@@ -1,0 +1,7 @@
+[BasicCard]
+CardType=ZC3.9
+
+[Compiler]
+SourceFile=donglecard.bas
+ImageFile=true
+StackSize=122

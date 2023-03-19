@@ -1,0 +1,299 @@
+Input file: F:\donsez\Rech\livreCartePuce\srcExempleOuvrage\basiccard\bcepurse\epurse.bas
+
+===== RAM regions =====
+
+Name       Start  End    Length
+----       -----  ---    ------
+RAMSYS     00     6F     70
+STACK      70     9B     2C
+RAMDATA    9C     9F     04
+RAMHEAP    A0     EC     4D
+FILEINFO   ED     FF     13
+
+===== EEPROM regions =====
+
+Name       Start  End    Length
+----       -----  ---    ------
+EEPSYS     8020   817C   015D
+CMDTAB     817D   81B9   003D
+PCODE      81BA   83F6   023D
+STRCON     83F7   83F9   0003
+KEYTAB                   0000
+EEPDATA    83FA   841A   0021
+EEPHEAP    841B   9FBF   1BA5
+
+===== Symbols by name =====
+
+Name                     Scope                    Address Type
+----                     -----                    ------- ----
+Algorithm                Global                   25      PUBLIC BYTE
+Amount                   PersonaliseCard          F4      PARAM LONG
+Amount                   GetCardData              F6      PARAM LONG
+Amount                   GetBalance               FA      PARAM LONG
+Amount                   Credit                   FA      PARAM LONG
+Amount                   Debit                    FA      PARAM LONG
+ApplicationName$         Global                           CONST="EPURSE"
+Balance                  Global                   8403    EEPROM LONG
+BalanceData              PRDisplay                00      PRIVATE LONG
+BalanceDataStr           PRDisplay                00      PRIVATE STRING*4
+CardMajorVersion         Global                           CONST=0003
+CardMinorVersion         Global                           CONST=0009
+ChangeBalance            Global                   834B    SUB
+ChangeMasterPIN          Global                   8362    COMMAND &H80 &H0E
+ChangePIN                Global                   8286    COMMAND &H80 &H08
+CheckAlgorithm           Global                   833B    SUB
+CLA                      Global                   6B      PUBLIC BYTE
+CommandsDefIncluded      Global                           CONST=FFFFFFFF
+Committed                Global                   8419    EEPROM INTEGER
+Credit                   Global                   82DC    COMMAND &H80 &H24
+CustomerName$            Global                   8411    EEPROM STRING
+Data                     PRDisplay                FC      PARAM STRING
+DataFormat               PRDisplay                F7      PARAM BYTE
+Debit                    Global                   8305    COMMAND &H80 &H22
+DecimalPoint             PRDisplay                F9      PARAM BYTE
+DecreaseAmount           Global                   8254    COMMAND &H80 &H06
+Delay                    PRDisplay                FA      PARAM BYTE
+Diff                     IncreaseAmount           FA      PARAM LONG
+Diff                     DecreaseAmount           FA      PARAM LONG
+DigitCount               PRDisplay                F8      PARAM BYTE
+EnhancedBasicCard        Global                           CONST=0001
+False                    Global                           CONST=0000
+FileError                Global                   FA      PUBLIC BYTE
+GetBalance               Global                   82CA    COMMAND &H80 &H20
+GetCardData              Global                   82AB    COMMAND &H80 &H0A
+IncreaseAmount           Global                   822F    COMMAND &H80 &H04
+INS                      Global                   6C      PUBLIC BYTE
+KeyNumber                Global                   52      PUBLIC BYTE
+Lc                       Global                   6F      PUBLIC BYTE
+Le                       Global                   55      PUBLIC BYTE
+MasterPIN                Global                   840B    EEPROM STRING*6
+MasterPINVerified        Global                   9E      PUBLIC INTEGER
+MaxPINErrors             Global                           CONST=0003
+MoreData                 PRDisplay                FB      PARAM BYTE
+Name$                    PersonaliseCard          FC      PARAM STRING
+Name$                    GetCardData              FC      PARAM STRING
+NewBalance               ChangeBalance            F8      PARAM LONG
+NewPIN                   PersonaliseCard          F8      PARAM STRING*4
+NewPIN                   ChangePIN                FA      PARAM STRING*4
+NewPIN                   ChangeMasterPIN          F8      PARAM STRING*6
+P1                       Global                   6D      PUBLIC BYTE
+P1P2                     Global                   6D      PUBLIC INTEGER
+P2                       Global                   6E      PUBLIC BYTE
+pcArrayNotDynamic        Global                           CONST=000F
+pcArrayTooBig            Global                           CONST=0010
+pcBadBounds              Global                           CONST=0008
+pcBadEepromHeap          Global                           CONST=0005
+pcBadKey                 Global                           CONST=0014
+pcBadLibraryCall         Global                           CONST=0015
+pcBadRamHeap             Global                           CONST=0004
+pcBadStringCall          Global                           CONST=000D
+pcBadSubscript           Global                           CONST=0007
+pcBadSystemCall          Global                           CONST=0013
+pcDeletedArray           Global                           CONST=0011
+pcDimensionError         Global                           CONST=000C
+pcDivideByZero           Global                           CONST=0002
+pcInvalidReal            Global                           CONST=0009
+pcNegativeSqrt           Global                           CONST=000B
+pcNotImplemented         Global                           CONST=0003
+PCodeError               Global                   53      PUBLIC BYTE
+pcOutOfMemory            Global                           CONST=000E
+pcOverflow               Global                           CONST=000A
+pcPCodeDisabled          Global                           CONST=0012
+pcReturnWithoutGoSub     Global                           CONST=0006
+pcStackOverflow          Global                           CONST=0001
+pcStackUnderflow         Global                           CONST=0016
+PersonaliseCard          Global                   81CD    COMMAND &H80 &H00
+Personalised             Global                   8401    EEPROM INTEGER
+PIN                      Global                   8407    EEPROM STRING*4
+PINCount                 GetCardData              FA      PARAM INTEGER
+PINErrors                Global                   8413    EEPROM INTEGER
+PINVerified              Global                   9C      PUBLIC INTEGER
+PRAlpha                  Global                           CONST=0001
+PRCur                    Global                           CONST=0010
+PRDelayUnits             Global                           CONST=00C8
+PRDisplay                Global                   83AC    COMMAND &HC8 &H00
+PReaderDefIncluded       Global                           CONST=FFFFFFFF
+PRHex                    Global                           CONST=0002
+PRMoreData               Global                           CONST=0001
+PRNoMoreData             Global                           CONST=0000
+PRNum                    Global                           CONST=0004
+PRNumSign                Global                           CONST=0008
+RecordNumber             PRDisplay                F6      PARAM BYTE
+ResponseLength           Global                   54      PUBLIC BYTE
+ShadowBalance            Global                   8415    EEPROM LONG
+SW1                      Global                   56      PUBLIC BYTE
+sw1LaWarning             Global                           CONST=006C
+sw1LeWarning             Global                           CONST=0061
+sw1PCodeError            Global                           CONST=0064
+SW1SW2                   Global                   56      PUBLIC INTEGER
+SW2                      Global                   57      PUBLIC BYTE
+swAesCheckError          Global                           CONST=66C5
+swAlreadyEncrypting      Global                           CONST=66C0
+swBadAesResponse         Global                           CONST=67A9
+swBadATR                 Global                           CONST=67A3
+swBadCommandCRC          Global                           CONST=66C2
+swBadDesResponse         Global                           CONST=679C
+swBadEepromHeap          Global                           CONST=6582
+swBadFileChain           Global                           CONST=6583
+swBadResponseCRC         Global                           CONST=6799
+swCardError              Global                           CONST=6795
+swCardNotReset           Global                           CONST=6796
+swCardPulled             Global                           CONST=6793
+swCardReaderError        Global                           CONST=6791
+swCardTimedOut           Global                           CONST=679A
+swCardUnconfigured       Global                           CONST=6986
+swCLANotFound            Global                           CONST=6E00
+swCommandOK              Global                           CONST=9000
+swCommandTooLong         Global                           CONST=6781
+swComPortBusy            Global                           CONST=67A2
+swComPortNotSupported    Global                           CONST=679E
+swCoprocessorError       Global                           CONST=66C4
+swDataNotFound           Global                           CONST=6A88
+swDataOverrun            Global                           CONST=67A8
+swDesCheckError          Global                           CONST=66C3
+swEepromWriteError       Global                           CONST=6581
+swEncryptionRequired     Global                           CONST=6B02
+swINSNotFound            Global                           CONST=6D00
+swInsufficientFunds      Global                           CONST=6B01
+swInternalError          Global                           CONST=6F00
+swInvalidComPort         Global                           CONST=679D
+swInvalidPIN             Global                           CONST=6B05
+swInvalidState           Global                           CONST=6985
+swIssuingKeyRequired     Global                           CONST=6B03
+swKeyDisabled            Global                           CONST=6614
+swKeyNotFound            Global                           CONST=6611
+swKeyNotLoaded           Global                           CONST=6797
+swKeyTooShort            Global                           CONST=6613
+swLcLeError              Global                           CONST=6700
+swNewStateError          Global                           CONST=6987
+swNoCardInReader         Global                           CONST=6792
+swNoCardReader           Global                           CONST=6790
+swNoPcscDriver           Global                           CONST=679F
+swNotEncrypting          Global                           CONST=66C1
+swNotPersonalised        Global                           CONST=6B00
+swOutsideEeprom          Global                           CONST=6A02
+swP1P2Error              Global                           CONST=6A00
+swPcscError              Global                           CONST=67A1
+swPcscReaderBusy         Global                           CONST=67A0
+swPINErrorsExceeded      Global                           CONST=6B06
+swPINRequired            Global                           CONST=6B04
+swPolyNotFound           Global                           CONST=6612
+swPolyNotLoaded          Global                           CONST=6798
+swPTSError               Global                           CONST=67A7
+swReservedCLA            Global                           CONST=6E80
+swReservedINS            Global                           CONST=6D80
+swResponseTooLong        Global                           CONST=6782
+swRetriesRemaining       Global                           CONST=63C0
+swT0Error                Global                           CONST=67A4
+swT1Error                Global                           CONST=6794
+swTermOutOfMemory        Global                           CONST=679B
+swUnknownAlgorithm       Global                           CONST=6615
+TestPIN                  VerifyPIN                FA      PARAM STRING*4
+TestPIN                  VerifyMasterPIN          F8      PARAM STRING*6
+True                     Global                           CONST=FFFFFFFF
+VerifyMasterPIN          Global                   8384    COMMAND &H80 &H0C
+VerifyPIN                Global                   81EE    COMMAND &H80 &H02
+
+===== Symbols by location =====
+
+RAM system data:
+
+Name                     Scope                    Address Type
+----                     -----                    ------- ----
+Algorithm                Global                   25      PUBLIC BYTE
+KeyNumber                Global                   52      PUBLIC BYTE
+PCodeError               Global                   53      PUBLIC BYTE
+ResponseLength           Global                   54      PUBLIC BYTE
+Le                       Global                   55      PUBLIC BYTE
+SW1                      Global                   56      PUBLIC BYTE
+SW1SW2                   Global                   56      PUBLIC INTEGER
+SW2                      Global                   57      PUBLIC BYTE
+CLA                      Global                   6B      PUBLIC BYTE
+INS                      Global                   6C      PUBLIC BYTE
+P1                       Global                   6D      PUBLIC BYTE
+P1P2                     Global                   6D      PUBLIC INTEGER
+P2                       Global                   6E      PUBLIC BYTE
+Lc                       Global                   6F      PUBLIC BYTE
+FileError                Global                   FA      PUBLIC BYTE
+
+RAM user data:
+
+Name                     Scope                    Address Type
+----                     -----                    ------- ----
+PINVerified              Global                   9C      PUBLIC INTEGER
+MasterPINVerified        Global                   9E      PUBLIC INTEGER
+
+EEPROM user data:
+
+Name                     Scope                    Address Type
+----                     -----                    ------- ----
+Personalised             Global                   8401    EEPROM INTEGER
+Balance                  Global                   8403    EEPROM LONG
+PIN                      Global                   8407    EEPROM STRING*4
+MasterPIN                Global                   840B    EEPROM STRING*6
+CustomerName$            Global                   8411    EEPROM STRING
+PINErrors                Global                   8413    EEPROM INTEGER
+ShadowBalance            Global                   8415    EEPROM LONG
+Committed                Global                   8419    EEPROM INTEGER
+
+User code:
+
+Name                     Scope                    Address Type
+----                     -----                    ------- ----
+Initialisation Code      Global                   81BA    SUB
+PersonaliseCard          Global                   81CD    COMMAND &H80 &H00
+VerifyPIN                Global                   81EE    COMMAND &H80 &H02
+IncreaseAmount           Global                   822F    COMMAND &H80 &H04
+DecreaseAmount           Global                   8254    COMMAND &H80 &H06
+ChangePIN                Global                   8286    COMMAND &H80 &H08
+GetCardData              Global                   82AB    COMMAND &H80 &H0A
+GetBalance               Global                   82CA    COMMAND &H80 &H20
+Credit                   Global                   82DC    COMMAND &H80 &H24
+Debit                    Global                   8305    COMMAND &H80 &H22
+CheckAlgorithm           Global                   833B    SUB
+ChangeBalance            Global                   834B    SUB
+ChangeMasterPIN          Global                   8362    COMMAND &H80 &H0E
+VerifyMasterPIN          Global                   8384    COMMAND &H80 &H0C
+PRDisplay                Global                   83AC    COMMAND &HC8 &H00
+
+Local variables:
+
+Name                     Scope                    Address Type
+----                     -----                    ------- ----
+Amount                   PersonaliseCard          F4      PARAM LONG
+NewPIN                   PersonaliseCard          F8      PARAM STRING*4
+Name$                    PersonaliseCard          FC      PARAM STRING
+
+TestPIN                  VerifyPIN                FA      PARAM STRING*4
+
+Diff                     IncreaseAmount           FA      PARAM LONG
+
+Diff                     DecreaseAmount           FA      PARAM LONG
+
+NewPIN                   ChangePIN                FA      PARAM STRING*4
+
+Amount                   GetCardData              F6      PARAM LONG
+PINCount                 GetCardData              FA      PARAM INTEGER
+Name$                    GetCardData              FC      PARAM STRING
+
+Amount                   GetBalance               FA      PARAM LONG
+
+Amount                   Credit                   FA      PARAM LONG
+
+Amount                   Debit                    FA      PARAM LONG
+
+NewBalance               ChangeBalance            F8      PARAM LONG
+
+NewPIN                   ChangeMasterPIN          F8      PARAM STRING*6
+
+TestPIN                  VerifyMasterPIN          F8      PARAM STRING*6
+
+RecordNumber             PRDisplay                F6      PARAM BYTE
+DataFormat               PRDisplay                F7      PARAM BYTE
+DigitCount               PRDisplay                F8      PARAM BYTE
+DecimalPoint             PRDisplay                F9      PARAM BYTE
+Delay                    PRDisplay                FA      PARAM BYTE
+MoreData                 PRDisplay                FB      PARAM BYTE
+Data                     PRDisplay                FC      PARAM STRING
+BalanceData              PRDisplay                00      PRIVATE LONG
+BalanceDataStr           PRDisplay                00      PRIVATE STRING*4

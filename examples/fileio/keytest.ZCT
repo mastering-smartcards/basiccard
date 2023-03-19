@@ -1,0 +1,36 @@
+[Main Window]
+Left=209
+Top=318
+Width=405
+Height=418
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=217
+Top=164
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Compiler]
+SourceFile=Keytest.bas
+IncludePath=..\..\inc;..\..\lib;..\..\tools
+
+[Terminal Program]
+ComPort=202
+
+[Watches]
+Watch1=FileError

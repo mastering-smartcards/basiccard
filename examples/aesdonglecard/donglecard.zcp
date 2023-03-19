@@ -1,0 +1,12 @@
+[ZCT]
+0=donglecard.zct
+1=dongleperso.zct
+
+[ZCC]
+0=donglecard.zcc
+
+[StartZCT]
+0=0
+
+[StartZCC]
+0=0

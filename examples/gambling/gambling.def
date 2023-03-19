@@ -1,0 +1,48 @@
+Rem Gambling BasicCard Source Code
+Rem ------------------------------------------------------------------
+Rem Copyright (C) 2002 Didier DONSEZ
+Rem ------------------------------------------------------------------
+
+Rem  GAMBLING CARD
+
+Rem  Commands
+
+Declare Command &H80 &H00 PersonaliseCard (Amount As Long, NewPIN As String*4, Name$)
+Declare Command &H80 &H02 VerifyPIN (TestPIN As String*4)
+Declare Command &H80 &H04 IncreaseAmount (Diff As Long)
+Declare Command &H80 &H06 DecreaseAmount (Diff As Long)
+Declare Command &H80 &H08 ChangePIN (NewPIN As String*4)
+Declare Command &H80 &H0A GetCardData (Amount As Long, PINCount, Customer$)
+
+Declare Command &H80 &H20 GetBalance (Balance As Long)
+Declare Command &H80 &H22 Debit (Amount As Long)
+Declare Command &H80 &H24 Credit (Amount As Long)
+Declare Command &H80 &H26 Bet(betAmount As Long)
+
+Declare Command &H80 &H30 SetWinRatio(ratio As Long)
+Declare Command &H80 &H32 GetWinRatio(ratio As Long)
+
+Declare Command &H80 &H34 GetBounds(numbounds@, bound0&,bound1&,bound2&,bound3&,bound4&,bound5&,bound6&,bound7&,bound8&,bound9&)
+Declare Command &H80 &H36 SetBounds(numbounds@, bound0&,bound1&,bound2&,bound3&,bound4&,bound5&,bound6&,bound7&,bound8&,bound9&)
+Declare Command &H80 &H38 GetWinnings(numwinnings@, winning0&,winning1&,winning2&,winning3&,winning4&,winning5&,winning6&,winning7&,winning8&,winning9&)
+Declare Command &H80 &H3A SetWinnings(numwinnings@, winning0&,winning1&,winning2&,winning3&,winning4&,winning5&,winning6&,winning7&,winning8&,winning9&)
+
+Rem  Status codes. All of these have SW1 = &H6B, to avoid clashes with
+Rem  the built-in status codes (see "1.4.2 Procedure Definitions" in the
+Rem  BasicCard documentation).
+
+Const swNotPersonalised                 = &H6B00
+Const swInsufficientFunds               = &H6B01
+Const swEncryptionRequired              = &H6B02
+Const swIssuingKeyRequired              = &H6B03
+Const swPINRequired                     = &H6B04
+Const swInvalidPIN                      = &H6B05
+Const swPINErrorsExceeded               = &H6B06
+Const swInconsistentBoundsAndWinnings   = &H6B07
+Const swInconsistentWinningRatio        = &H6B08
+
+
+Rem  Other constants
+
+Const ApplicationName$ = "GAMBLING"
+Const MaxPINErrors     = 3 ' Allow the user three unsuccessful attempts

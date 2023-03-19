@@ -1,0 +1,11 @@
+[BasicCard]
+CardType=ZC3.9
+
+[Compiler]
+SourceFile=epurse.bas
+ImageFile=true
+ListingFile=true
+MapFile=true
+
+[Card Reader]
+VirtualReader=201

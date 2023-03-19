@@ -1,0 +1,33 @@
+[Main Window]
+Left=71
+Top=297
+Width=405
+Height=439
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=330
+Top=230
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Compiler]
+SourceFile=Linetest.bas
+IncludePath=..\..\inc;..\..\lib;..\..\tools
+
+[Terminal Program]
+ComPort=201

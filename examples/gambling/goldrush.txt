@@ -1,0 +1,11 @@
+Gain GOLD RUSH
+Cerise			2
+Cerise	Cerise		5
+Citron	Citron	Citron	10
+BarVio	BarVio	BarVio	20
+Pomme	Pomme	Pomme	30
+BarRou	BarRou	BarRou	40
+BarJau	BarJau	BarJau	80
+Raisin	Raisin	Raisin	100
+Melon	Melon	Melon	200
+Diamant	Diamant	Diamant	500

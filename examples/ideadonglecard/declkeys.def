@@ -1,0 +1,19 @@
+Rem DongleCard (for Enhanced or Professional BasicCard)
+Rem -------------------------------------------------------
+Rem Copyright (C) 2002 Didier DONSEZ
+Rem -------------------------------------------------------
+
+REM Keys must be declare before use !
+
+REM Key 0 is the MasterKey
+Declare Key 0(KeySize) = NullKey
+
+REM Other keys represents separate licences
+Declare Key 1(KeySize) = NullKey
+Declare Key 2(KeySize) = NullKey
+Declare Key 3(KeySize) = NullKey
+Declare Key 4(KeySize) = NullKey
+Declare Key 5(KeySize) = NullKey
+Declare Key 6(KeySize) = NullKey
+Declare Key 7(KeySize) = NullKey
+Declare Key 8(KeySize) = NullKey

@@ -1,0 +1,54 @@
+[Main Window]
+Left=505
+Top=100
+Width=405
+Height=438
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=330
+Top=230
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Files Window]
+Left=360
+Top=260
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[BasicCard]
+CardType=ZC3.9
+
+[Compiler]
+SourceFile=donglecard.bas
+ImageFile=true
+
+[Card Reader]
+VirtualReader=1
+
+[EEPROM]
+MaskCRC=5BFB910A
+CRC=221B5367
+Length=134
+Block0=/&fVd\UjJXt!VMn9w446IoqMzRb&s&CA#blhxiEp<iC(#_cG5=aQ$V<\$!akW=SNAr;:EW>
+Block1=9ZnU3e2n5^wt7U|oE[pgLi@L\bCAFqK!#5%.y8cwm8;mZR&Gb0?N,:~Qxg_R~af87P"<E;2
+Block2=U2k'B,iNu1e!6'R(#QcL>_
+StartCRC=9773150F

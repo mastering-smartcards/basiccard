@@ -1,0 +1,42 @@
+Rem DongleCard (for Enhanced or Professional BasicCard)
+Rem -------------------------------------------------------
+Rem Copyright (C) 2002 Didier DONSEZ
+Rem -------------------------------------------------------
+
+Const DongleCardCLA           = &H00
+Const KeySize                 = &H10
+Const BlockSize               = &H10
+
+Rem  Commands
+Declare Command DongleCardCLA &H10 Personalize       (SerialNumberP&, MasterKeyStr$ As String*KeySize, OwnerP$)
+
+Declare Command DongleCardCLA &H12 GetEncryptionAlgo (NameP$)
+Declare Command DongleCardCLA &H14 GetKeySize        (KeySizeP@)
+Declare Command DongleCardCLA &H16 GetBlockSize      (BlockSizeP@)
+Declare Command DongleCardCLA &H18 GetSerialNumber   (SerialNumberP&)
+Declare Command DongleCardCLA &H1A GetOwner          (OwnerP$)
+
+Declare Command DongleCardCLA &H20 SetLicence        (KeyNum@, EncryptedKeyStr$ As String*KeySize)
+Declare Command DongleCardCLA &H22 UnsetLicence      (KeyNum@)
+Declare Command DongleCardCLA &H24 IsLicenced        (KeyNum@)
+
+Declare Command DongleCardCLA &H30 Encrypt           (KeyNum@, Data$)
+Declare Command DongleCardCLA &H32 Decrypt           (KeyNum@, Data$)
+
+
+Rem  Status codes. All of these have SW1 = &H6B, to avoid clashes with
+Rem  the built-in status codes (see "1.4.2 Procedure Definitions" in the
+Rem  BasicCard documentation).
+
+Rem  Other constants
+
+Const swIllegalOperation	= &H6B00
+Const swInvalidKeySize		= &H6B01
+Const swInvalidDataLength	= &H6B02
+Const swNoMasterKey		= &H6B03
+Const swNoKey			= &H6B04
+Const swNotPersonalized		= &H6B05
+Const swYetPersonalized		= &H6B06
+
+
+Const ApplicationName$ = "DongleBasicCard"

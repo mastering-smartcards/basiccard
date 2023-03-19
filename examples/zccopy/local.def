@@ -1,0 +1,4 @@
+Declare Sub CheckPort()
+
+Declare Command &HFE &H02 Encrypt(ByRef data$ as String*64, Key% as Integer)
+Declare Command &HFE &H04 Decrypt(ByRef data$ as String*64, Key% as Integer)

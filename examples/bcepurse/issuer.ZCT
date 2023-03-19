@@ -1,0 +1,6 @@
+[Compiler]
+SourceFile=Issuer.bas
+ExeFile=true
+
+[Terminal Program]
+LogFile=issuer.log

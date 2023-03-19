@@ -1,0 +1,45 @@
+[Main Window]
+Left=609
+Top=300
+Width=405
+Height=438
+State=0
+Visible=true
+StayOnTop=false
+
+[Watches Window]
+Left=330
+Top=230
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[I/O Window]
+Left=300
+Top=200
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Files Window]
+Left=360
+Top=260
+Width=400
+Height=150
+State=0
+Visible=false
+StayOnTop=false
+
+[Compiler]
+SourceFile=Treecard.bas
+IncludePath=..\..\inc;..\..\lib;..\..\tools
+
+[BasicCard]
+CardType=ZC3.9
+
+[Card Reader]
+VirtualReader=203
